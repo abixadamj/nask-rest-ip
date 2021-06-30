@@ -79,7 +79,7 @@ Dodatkowo skryptem `create_test_knowledgebase.py` wygenerowałem `4 000 001` rek
 Polecenie `docker-compose up` uruchamia  kontener z ustawieniami domyślnymi:
 - bazą `baza_wiedzy.json` z 9 pozycjami
 - logowaniem w trybie `DEBUG` do pliku `nask.log`
-- dozwolone duplikaty w liście tagów
+- zabronione duplikaty w liście tagów
 
 Przykłady logów z uruchomionej aplikacji:
 
