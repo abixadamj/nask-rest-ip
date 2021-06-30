@@ -104,7 +104,7 @@ INFO:root:2021-06-30 19:23:08.868411 -> /ip-tags-report built for ipv4 10.20.30.
 DEBUG:root:2021-06-30 19:23:08.868530 -> tags = ['bar', '123 & abc & XYZ!']
 ```
 
-### Testy jednostkowe fastAPI:
+## Testy jednostkowe fastAPI:
 
 Testy są zdefiniowane w pliku `test_main_api.py`. Pokrywają najważniejsze przypadki obu endpointów i dodatkowe 
 sprawdzenie ustawienia zmiennej środowiskowej `ALLOW_DUPLICATE_TAGS`, która dla celów testowych powinna mieć wartość `False`. 
@@ -174,8 +174,39 @@ nask-rest-ip_python_1 exited with code 0
 
 ```
 
+## Test wydajności:
 
-TODO:
+Dla potrzeb sprawdzenia test wykonałem z pełną bazą (4 miliony rekordów). Jako procedurę testującą wykorzystałem prosty 
+program, który sprawdzał request do endpoint `/ip-tags` dla 50 różnych IP, aby uniknąć przyspieszenia związanego z `@lru_cache`.
+Wyniki są bardzo obiecujące, gdyż założona wydajność obsługi 50 żądań / sekundę wydaje się być spełniona z dużym zapasem.
+(*Przy tej prędkości można oczekiwać obsługi nawet średnio ok. 200~250 żądań / sekundę*).
+Aby wykonać taki test, należy do obrazu kontenera skopiować plik `large_knowledgebase.json` i odpowiednio ustawić zmienne. 
+Wówczas przy uruchomionym kontenerze można uruchomić skrypt `client_speed_test.py`:  
 
+```shell
+adasiek@devel ~/python_projekty/nask-rest-ip                                                                             [23:54:17] 
+(venv) > $ python client_speed_test.py                                                                                  [±task ●●●]
+Time for access 50 ip's: 0.1767287969996687 seconds.
+Time for access 50 ip's: 0.17343287800031248 seconds.
+Time for access 50 ip's: 0.17265570599920466 seconds.
+Time for access 50 ip's: 0.17165610199845105 seconds.
+Time for access 50 ip's: 0.16974818800008507 seconds.
+Time for access 50 ip's: 0.17486193399963668 seconds.
+Time for access 50 ip's: 0.17075031099921034 seconds.
+Time for access 50 ip's: 0.16723612799978582 seconds.
+Time for access 50 ip's: 0.17457403199841792 seconds.
+Time for access 50 ip's: 0.1716537789998256 seconds.
+Time for access 50 ip's: 0.16600215099970228 seconds.
+Time for access 50 ip's: 0.1743045040002471 seconds.
+Time for access 50 ip's: 0.17031424599917955 seconds.
+Time for access 50 ip's: 0.17536983599893574 seconds.
+Time for access 50 ip's: 0.16591847699965 seconds.
+Time for access 50 ip's: 0.16764187300032063 seconds.
+Time for access 50 ip's: 0.16705388099944685 seconds.
+Time for access 50 ip's: 0.16260123100073542 seconds.
+Time for access 50 ip's: 0.163031571000829 seconds.
+Time for access 50 ip's: 0.1657911990005232 seconds.
+
+```
  
 
