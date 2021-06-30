@@ -36,7 +36,8 @@ Dla poprawnie podanych adresów IP nie odnalezionych w bazie (np. `193.39.22.1 l
   `{"detail":"IP not found in database."}`
 
 Dodatkowo dostępny jest API Endpoint `/status` dla celów sprawdzenia, oddaje różne informacje, np.:
-```
+
+```python
 {
   "system":["Linux","bf13737490dc","5.8.0-59-generic","#66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10 UTC 2021","x86_64"],
   "python":"3.9.5 (default, May 12 2021, 15:26:36) \n[GCC 8.3.0] - sys.version_info(major=3, minor=9, micro=5, releaselevel='final', serial=0)",
@@ -51,7 +52,7 @@ Dodatkowo dostępny jest API Endpoint `/status` dla celów sprawdzenia, oddaje r
 ----
 ## Dane testowe przygotowane z opisu:
 
-```
+```python
 [
   {"tag": "foo", "ip_network": "192.0.2.0/24"},
   {"tag": "{$(\n a-tag\n)$}", "ip_network": "192.168.7.0/24"},
@@ -69,10 +70,10 @@ Dodatkowo skryptem `create_test_knowledgebase.py` wygenerowałem `4 000 001` rek
 
 ----
 ## Zmienne środowiskowe:
-* `JSON_DEBUG`, domyślna wartość False, możliwe: False | True
+* `JSON_DEBUG`, domyślna wartość `False`, możliwe: `False | True`
 * `JSON_LOGFILE`, domyślna wartość `nask.log`
 * `JSON_DATABASE`, domyślna wartość `baza_wiedzy.json` (*zawiera kilka przykładowych wpisów stworzonych na podstawie dokumentacji zadania*)
-* `ALLOW_DUPLICATE_TAGS`, domyślna wartość True, możliwe: False | True (*czy dozwalamy w liście tagów na duplikaty, jeśli podczas wyszukiwania natrafimy na różne definicje CIDR pasujące dla danego IP*)
+* `ALLOW_DUPLICATE_TAGS`, domyślna wartość `False`, możliwe: `False | True` (*czy dozwalamy w liście tagów na duplikaty, jeśli podczas wyszukiwania natrafimy na różne definicje CIDR pasujące dla danego IP*)
 
 ## Docker
 Polecenie `docker-compose up` uruchamia  kontener z ustawieniami domyślnymi:
@@ -82,7 +83,7 @@ Polecenie `docker-compose up` uruchamia  kontener z ustawieniami domyślnymi:
 
 Przykłady logów z uruchomionej aplikacji:
 
-```
+```shell
 adasiek@devel ~/python_projekty/nask-rest-ip                                                                             [21:21:54] 
 > $ docker exec bf13737490dc tail -f nask.log                                                                           [±task ●●●]
 DEBUG:root:2021-06-30 19:13:56.188043 -> VIRT mem: svmem(total=24643485696, available=19829370880, percent=19.5, used=3922280448, free=16254357504, active=4763475968, inactive=2627391488, buffers=111607808, cached=4355239936, shared=522637312, slab=356974592)
@@ -103,10 +104,78 @@ INFO:root:2021-06-30 19:23:08.868411 -> /ip-tags-report built for ipv4 10.20.30.
 DEBUG:root:2021-06-30 19:23:08.868530 -> tags = ['bar', '123 & abc & XYZ!']
 ```
 
+### Testy jednostkowe fastAPI:
 
+Testy są zdefiniowane w pliku `test_main_api.py`. Pokrywają najważniejsze przypadki obu endpointów i dodatkowe 
+sprawdzenie ustawienia zmiennej środowiskowej `ALLOW_DUPLICATE_TAGS`, która dla celów testowych powinna mieć wartość `False`. 
+. Aby je wywołać, należy w pliku `Dockerfile` ustawić odpowidnio komentarze:
+
+```shell
+# uruchomienie środowiska produkcyjnego
+# CMD ["python", "main_api.py"]
+# testy automatyczne fastAPI
+CMD ["pytest"]
+```
+
+Przykładowe uruchomienie kontenera z testami `docker-compose up --build` (dodatkowy parametr jest niezbędny dla przebudowania obrazu) :
+
+Wynik z przykładowymi błędami:
+```shell
+Successfully tagged nask-rest-ip_python:latest
+Recreating nask-rest-ip_python_1 ... done
+Attaching to nask-rest-ip_python_1
+python_1  | ============================= test session starts ==============================
+python_1  | platform linux -- Python 3.9.5, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
+python_1  | rootdir: /code
+python_1  | collected 8 items
+python_1  | 
+python_1  | test_main_api.py .FF.....                                                [100%]
+python_1  | 
+python_1  | =================================== FAILURES ===================================
+python_1  | __________________________ test_read_status_duplicate __________________________
+python_1  | 
+python_1  |     def test_read_status_duplicate():
+python_1  |         response = client.get("/status")
+python_1  | >       assert response.json()["__ALLOW_DUPLICATE_TAGS__"] is True
+python_1  | E       assert False is True
+python_1  | 
+python_1  | test_main_api.py:14: AssertionError
+python_1  | _________________________________ test_ip_tags _________________________________
+python_1  | 
+python_1  |     def test_ip_tags():
+python_1  |         response = client.get("/ip-tags/10.20.30.40")
+python_1  | >       assert response.status_code == 400
+python_1  | E       assert 200 == 400
+python_1  | E        +  where 200 = <Response [200]>.status_code
+python_1  | 
+python_1  | test_main_api.py:18: AssertionError
+python_1  | =========================== short test summary info ============================
+python_1  | FAILED test_main_api.py::test_read_status_duplicate - assert False is True
+python_1  | FAILED test_main_api.py::test_ip_tags - assert 200 == 400
+python_1  | ========================= 2 failed, 6 passed in 0.38s ==========================
+nask-rest-ip_python_1 exited with code 1
+
+```
+
+Wynik poprawny:
+```shell
+Successfully tagged nask-rest-ip_python:latest
+Recreating nask-rest-ip_python_1 ... done
+Attaching to nask-rest-ip_python_1
+python_1  | ============================= test session starts ==============================
+python_1  | platform linux -- Python 3.9.5, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
+python_1  | rootdir: /code
+python_1  | collected 8 items
+python_1  | 
+python_1  | test_main_api.py ........                                                [100%]
+python_1  | 
+python_1  | ============================== 8 passed in 0.33s ===============================
+nask-rest-ip_python_1 exited with code 0
+
+```
 
 
 TODO:
-- testy
+
  
 

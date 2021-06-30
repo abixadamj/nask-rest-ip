@@ -2,3 +2,5 @@ fastapi
 uvicorn
 psutil
 memory_profiler
+requests
+pytest
