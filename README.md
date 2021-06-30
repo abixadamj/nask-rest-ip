@@ -108,5 +108,5 @@ DEBUG:root:2021-06-30 19:23:08.868530 -> tags = ['bar', '123 & abc & XYZ!']
 
 TODO:
 - testy
-- Dane dostępowe - zadanie dostępne po uruchomieniu dockera  `docker-compose up` pod adresem: http://localhost:8000/ 
+ 
 
