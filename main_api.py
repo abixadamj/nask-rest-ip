@@ -13,8 +13,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
 
-__DEBUG__ = os.getenv("JSON_DEBUG", False)
-__ALLOW_DUPLICATE_TAGS__ = os.getenv("ALLOW_DUPLICATE_TAGS", True)
+__DEBUG__ = os.getenv("JSON_DEBUG", 'False').lower() in ('true', '1', 't')
+__ALLOW_DUPLICATE_TAGS__ = os.getenv("ALLOW_DUPLICATE_TAGS", 'False').lower() in ('true', '1', 't')
 app: FastAPI = fastapi.FastAPI()
 pid = os.getpid()
 
@@ -251,6 +251,18 @@ async def ip_tags_report(ip: str):
         log_local(logging.DEBUG, f"tags = {tags}")
     return HTMLResponse(ret_html)
 
+@app.get("/status")
+def status():
+    """report some status"""
+    return {
+        "system": os.uname(),
+        "python": f"{sys.version} - {sys.version_info}",
+        "logfile": os.getenv("JSON_LOGFILE", "nask.log"),
+        "knowledgebase": os.getenv("JSON_DATABASE", "baza_wiedzy.json"),
+        "total_entries": len(knowledgebase),
+        "__DEBUG__": __DEBUG__,
+        "__ALLOW_DUPLICATE_TAGS__": __ALLOW_DUPLICATE_TAGS__,
+    }
 
 if __name__ == "__main__":
-    uvicorn.run(app)
+    uvicorn.run(app, host="0.0.0.0")
