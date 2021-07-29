@@ -1,0 +1,14 @@
+[
+  {"tag": "foo", "ip_network": "192.0.2.0/24"},
+  {"tag": "{$(\n a-tag\n)$}", "ip_network": "192.168.7.0/24"},
+  {"tag": "za\u017c\u00f3\u0142\u0107 \u2665", "ip_network": "192.168.7.0/24"},
+  {"tag": "bar", "ip_network": "192.0.2.8/29"},
+  {"tag": "bar", "ip_network": "10.20.0.0/16"},
+  {"tag": "just a TAG", "ip_network": "192.168.7.0/24"},
+  {"tag": "SPAM", "ip_network": "10.20.30.40/32"},
+  {"tag": "bar", "ip_network": "10.20.0.0/16"},
+  {"tag": "123 & abc & XYZ!", "ip_network": "10.20.0.0/16"}
+]
+
+
+
